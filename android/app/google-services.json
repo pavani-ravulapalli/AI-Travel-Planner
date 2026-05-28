@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "132778680853",
+    "project_id": "tripzy-77",
+    "storage_bucket": "tripzy-77.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:132778680853:android:62fec2966ab28f53c5e41c",
+        "android_client_info": {
+          "package_name": "com.example.travel_planner_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyByZeTV3l1vDlV2XN47luVocW2VtmaSb4o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
