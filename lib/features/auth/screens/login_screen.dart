@@ -8,6 +8,7 @@ import 'google_signin_screen.dart';
 import 'home_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -89,12 +90,12 @@ class _LoginScreenState extends State<LoginScreen> {
               CustomButton(
                 text: 'Login',
                 onPressed: () {
-                  print(FirebaseAuth.instance.currentUser);
+                  print("user email: ${emailController.text}");
                     if (FirebaseAuth.instance.currentUser != null) {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const HomeScreen(),
+                          builder: (_) => const HomeScreen(),
                         ),
                       );
                     }

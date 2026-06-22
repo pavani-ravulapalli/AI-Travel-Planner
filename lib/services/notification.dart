@@ -11,7 +11,8 @@ class NotificationScreen extends StatefulWidget {
 
 class _NotificationScreenState extends State<NotificationScreen> {
   //PUSH NOTIFICATION
-  void firebaseMessaging() async{
+  Future<void> firebaseMessaging() async{
+    print("firebasemessaging function started");
     //firebase messaging initialize
     FirebaseMessaging messaging = FirebaseMessaging.instance;
     //fcm token
@@ -53,7 +54,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
       );
     });
     //app is not closed but is in background
-FirebaseMessaging.onMessage.listen((RemoteMessage message){
+FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message){
+  print("tapped");
 final title = message.notification?.title ?? "N/A";
 final body = message.notification?.body ?? "N/A";
 Navigator.push(
@@ -68,6 +70,7 @@ body: body,
 //app is in termination state
     FirebaseMessaging.instance.getInitialMessage().then((message){
       if(message !=null) {
+        if (!mounted) return;
         final title = message.notification?.title ?? "N/A";
         final body = message.notification?.body ?? "N/A";
         Navigator.push(
@@ -87,6 +90,7 @@ body: body,
   void initState() {
     // TODO: implement initState
     super.initState();
+    print("init state called");
     //call the function
     firebaseMessaging();
   }
