@@ -89,16 +89,25 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               CustomButton(
                 text: 'Login',
-                onPressed: () {
-                  print("user email: ${emailController.text}");
-                    if (FirebaseAuth.instance.currentUser != null) {
+                  onPressed: () async {
+                    try {
+                      await FirebaseAuth.instance
+                          .signInWithEmailAndPassword(
+                        email: emailController.text.trim(),
+                        password: passwordController.text.trim(),
+                      );
+
+                      if (!mounted) return;
+
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
                           builder: (_) => const HomeScreen(),
                         ),
                       );
-                    }
+                    } on FirebaseAuthException catch (e) {
+                      print(e.code);
+                    };
                   },
               ),
               const SizedBox(height: 20),
