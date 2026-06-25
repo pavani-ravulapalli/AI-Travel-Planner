@@ -75,6 +75,7 @@ class GoogleSignInService {
             'email': user.email ?? '',
             'photoURL': user.photoURL ?? '',
             'provider': 'google',
+            'role':'user',
             'createdAt': FieldValue.serverTimestamp(),
           });
         }

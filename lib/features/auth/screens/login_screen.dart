@@ -9,6 +9,8 @@ import 'home_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'admin_dashboard.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'hotel_owner_dashboard.dart';
+import 'airline_owner_dashboard.dart';
 
 
 class LoginScreen extends StatefulWidget {
@@ -117,7 +119,23 @@ class _LoginScreenState extends State<LoginScreen> {
                           builder: (_) => const AdminDashboard(),
                         ),
                       );
-                    } else {
+                    } else if (role == 'hotel_owner') {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const HotelOwnerDashboard(),
+                        ),
+                      );
+                    } else if (role == 'airline_owner') {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const AirlineOwnerDashboard(),
+                        ),
+                      );
+                    }
+
+                    else {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:travel_planner_app/features/auth/screens/ai_itenirary_screen.dart';
 import 'package:travel_planner_app/features/chatbot/gemini_ai.dart';
 import 'profile_screen.dart';
 import 'location_detail_screen.dart';
@@ -368,7 +369,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => const GeminiChatBot(),
+                  builder: (_) => const ChatbotScreen(),
                 ),
               );
             },

@@ -5,6 +5,7 @@ import 'app.dart';
 import 'firebase_options.dart';
 import 'package:travel_planner_app/features/auth/screens/notification_detail_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_ai/firebase_ai.dart';
 
 @pragma('vm:entry-point')
 Future<void>_backgroundMessaging(RemoteMessage message)async{

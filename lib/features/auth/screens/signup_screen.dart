@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'login_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -13,15 +14,18 @@ class _SignupScreenState extends State<SignupScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
+  final nameController = TextEditingController();
 
   bool obscurePassword = true;
   bool obscureConfirm = true;
   bool isLoading = false;
+  String selectedRole = 'user';
 
   Future<void> signup() async {
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
     final confirmPassword = confirmPasswordController.text.trim();
+    final name = nameController.text.trim();
 
     if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -40,10 +44,20 @@ class _SignupScreenState extends State<SignupScreen> {
     try {
       setState(() => isLoading = true);
 
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
+
+      final user = credential.user!;
+
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        'name':name,
+        'email':email,
+        'role':selectedRole,
+        'photoURL':'',
+        'createdAt':Timestamp.now(),
+      });
 
       if (!mounted) return;
 
@@ -99,6 +113,12 @@ class _SignupScreenState extends State<SignupScreen> {
               ),
               const SizedBox(height: 24),
               _textField(
+                controller: nameController,
+                hintText: 'Name',
+                icon: Icons.person_outline,
+              ),
+              const SizedBox(height: 24),
+              _textField(
                 controller: emailController,
                 hintText: 'E-Mail',
                 icon: Icons.email_outlined,
@@ -133,6 +153,33 @@ class _SignupScreenState extends State<SignupScreen> {
                     obscureConfirm ? Icons.visibility_off : Icons.visibility,
                   ),
                 ),
+              ),
+
+              DropdownButtonFormField<String>(
+                value: selectedRole,
+                decoration: const InputDecoration(
+                  labelText: 'Select Role',
+                  border: OutlineInputBorder(),
+                ),
+                items: const [
+                  DropdownMenuItem(
+                    value: 'user',
+                    child: Text('User'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'hotel_owner',
+                    child: Text('Hotel Owner'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'airline_owner',
+                    child: Text('Airline Owner'),
+                  ),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    selectedRole = value!;
+                  });
+                },
               ),
               const SizedBox(height: 18),
               SizedBox(

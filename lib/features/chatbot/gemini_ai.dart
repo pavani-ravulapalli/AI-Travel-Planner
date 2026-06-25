@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
-import 'package:google_generative_ai/google_generative_ai.dart';
+/*import 'package:flutter/material.dart';
 import 'package:travel_planner_app/features/chatbot/model.dart';
 import 'package:intl/intl.dart';
+import 'package:firebase_ai/firebase_ai.dart';
 
 class GeminiChatBot extends StatefulWidget {
   const GeminiChatBot({super.key});
@@ -12,8 +12,9 @@ class GeminiChatBot extends StatefulWidget {
 
 class _GeminiChatBotState extends State<GeminiChatBot> {
   TextEditingController promptController = TextEditingController();
-  static const apiKey = "chatbot-key";
-  final model = GenerativeModel(model:"gemini-2.5-flash", apiKey:apiKey,);
+  final model =
+  FirebaseAI.vertexAI(location: 'global').generativeModel(model: 'gemini-3.5-flash');
+
 
   final List<ModelMessage> prompt = [];
 
@@ -154,5 +155,207 @@ class _GeminiChatBotState extends State<GeminiChatBot> {
                   ],
                 ),
               );
+  }
+}*/
+
+import 'package:flutter/material.dart';
+import '../../../services/ai_service.dart';
+
+class ChatbotScreen extends StatefulWidget {
+  const ChatbotScreen({super.key});
+
+  @override
+  State<ChatbotScreen> createState() => _ChatbotScreenState();
+}
+
+class _ChatbotScreenState extends State<ChatbotScreen> {
+  final TextEditingController messageController =
+  TextEditingController();
+
+  final ScrollController scrollController =
+  ScrollController();
+
+  final AIService aiService = AIService();
+
+  List<Map<String, dynamic>> messages = [];
+
+  bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    messages.add({
+      'text':
+      '👋 Hi! I am Tripzy AI.\n\nAsk me about destinations, itineraries, hotels, flights, budgets, travel tips, and more.',
+      'isUser': false,
+    });
+  }
+
+  void scrollToBottom() {
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (scrollController.hasClients) {
+        scrollController.animateTo(
+          scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  Future<void> sendMessage() async {
+    if (messageController.text.trim().isEmpty) return;
+
+    String userMessage = messageController.text.trim();
+
+    setState(() {
+      messages.add({
+        'text': userMessage,
+        'isUser': true,
+      });
+      isLoading = true;
+    });
+
+    messageController.clear();
+    scrollToBottom();
+
+    try {
+      final aiReply =
+      await aiService.askTravelAssistant(userMessage);
+
+      setState(() {
+        messages.add({
+          'text': aiReply,
+          'isUser': false,
+        });
+      });
+    } catch (e) {
+      setState(() {
+        messages.add({
+          'text': 'Error: $e',
+          'isUser': false,
+        });
+      });
+    }
+
+    setState(() {
+      isLoading = false;
+    });
+
+    scrollToBottom();
+  }
+
+  @override
+  void dispose() {
+    messageController.dispose();
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Tripzy AI Assistant"),
+        centerTitle: true,
+      ),
+      body: Column(
+        children: [
+
+          Expanded(
+            child: ListView.builder(
+              controller: scrollController,
+              padding: const EdgeInsets.all(12),
+              itemCount: messages.length,
+              itemBuilder: (context, index) {
+                final message = messages[index];
+
+                return Align(
+                  alignment: message['isUser']
+                      ? Alignment.centerRight
+                      : Alignment.centerLeft,
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(
+                      vertical: 5,
+                    ),
+                    padding: const EdgeInsets.all(12),
+                    constraints: BoxConstraints(
+                      maxWidth:
+                      MediaQuery.of(context).size.width * 0.75,
+                    ),
+                    decoration: BoxDecoration(
+                      color: message['isUser']
+                          ? Colors.blue
+                          : Colors.grey.shade300,
+                      borderRadius:
+                      BorderRadius.circular(16),
+                    ),
+                    child: Text(
+                      message['text'],
+                      style: TextStyle(
+                        color: message['isUser']
+                            ? Colors.white
+                            : Colors.black,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+
+          if (isLoading)
+            const Padding(
+              padding: EdgeInsets.all(8),
+              child: CircularProgressIndicator(),
+            ),
+
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Row(
+                children: [
+
+                  Expanded(
+                    child: TextField(
+                      controller: messageController,
+                      textInputAction: TextInputAction.send,
+                      onSubmitted: (_) => sendMessage(),
+                      decoration: InputDecoration(
+                        hintText:
+                        "Ask about trips, hotels, flights...",
+                        border: OutlineInputBorder(
+                          borderRadius:
+                          BorderRadius.circular(25),
+                        ),
+                        contentPadding:
+                        const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(width: 8),
+
+                  CircleAvatar(
+                    radius: 25,
+                    child: IconButton(
+                      onPressed: isLoading
+                          ? null
+                          : sendMessage,
+                      icon: const Icon(Icons.send),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
