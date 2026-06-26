@@ -42,12 +42,23 @@ class _HomeScreenState extends State<HomeScreen> {
   String? userName;
   String? photoUrl;
   String currentCity = "Loading...";
+  final List<Map<String, String>> preferences = [
+    {"title": "Beach", "image": "assets/preferences/beach.png"},
+    {"title": "Adventure", "image": "assets/preferences/adventure.png"},
+    {"title": "Wildlife", "image": "assets/preferences/wildlife.png"},
+    {"title": "Camping", "image": "assets/preferences/camping.png"},
+    {"title": "Nature", "image": "assets/preferences/nature.png"},
+    {"title": "Heritage", "image": "assets/preferences/heritage.png"},
+  ];
+
+  final Set<String> selectedPreferences = {};
 
   @override
   void initState() {
     super.initState();
     _loadCity();
     _loadUserData();
+    loadPreferences();
   }
 
   Future<void> _loadCity() async {
@@ -88,6 +99,42 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (e) {
       debugPrint('Error loading user data: $e');
     }
+  }
+
+  Future<void> loadPreferences() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) return;
+
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .get();
+
+    if (doc.exists) {
+      final data = doc.data();
+
+      if (data != null && data['preferences'] != null) {
+        setState(() {
+          selectedPreferences.addAll(
+            List<String>.from(data['preferences']),
+          );
+        });
+      }
+    }
+  }
+
+  Future<void> savePreferences() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) return;
+
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .update({
+      'preferences': selectedPreferences.toList(),
+    });
   }
 
   @override
@@ -225,6 +272,94 @@ class _HomeScreenState extends State<HomeScreen> {
                   borderRadius: BorderRadius.circular(15),
                 ),
               ),
+            ),
+
+
+            //user travel preferences
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    "Preferences",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                SizedBox(
+                  height: 52,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: preferences.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 10),
+                    itemBuilder: (context, index) {
+
+                      final item = preferences[index];
+                      final selected =
+                      selectedPreferences.contains(item["title"]);
+
+                      return FilterChip(
+
+                        selected: selected,
+
+                        onSelected: (value) async{
+                          setState(() {
+                            value
+                                ? selectedPreferences.add(item["title"]!)
+                                : selectedPreferences.remove(item["title"]);
+                          });
+                          await savePreferences();
+                        },
+
+                        avatar: CircleAvatar(
+                          radius: 14,
+                          backgroundImage:
+                          AssetImage(item["image"]!),
+                        ),
+
+                        label: Text(
+                          item["title"]!,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: selected
+                                ? Colors.white
+                                : Colors.black87,
+                          ),
+                        ),
+
+                        backgroundColor: Colors.white,
+
+                        selectedColor: Colors.blue,
+
+                        checkmarkColor: Colors.white,
+
+                        side: BorderSide(
+                          color: selected
+                              ? Colors.blue
+                              : Colors.grey.shade300,
+                        ),
+
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 8,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
 
             const SizedBox(height: 25),
